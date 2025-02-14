@@ -53,3 +53,22 @@ Options:
 --help
     Show this message and exit.
 ```
+# **Results**
+
+1. **alleles.profile**  
+   cgMLST typing generates the allele profile, which can later be used with Grapetree software to construct phylogenetic trees or for visualization.
+
+2. **amr.txt**  
+   Antibiotic resistance gene comparison results.
+
+3. **ani.txt**  
+   Species similarity comparison results.
+
+4. **sccmec.txt**  
+   SCCmec type comparison results.
+
+5. **vf.txt**  
+   Virulence gene comparison results.
+
+6. **summary.txt**  
+   A summary of all results.
