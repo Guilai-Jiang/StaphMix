@@ -56,7 +56,8 @@ Options:
 # **Results**
 
 1. **alleles.profile**  
-   cgMLST typing generates the allele profile, which can later be used with Grapetree software to construct phylogenetic trees or for visualization.
+   cgMLST typing generates the allele profile, which can later be used with [Grapetree](https://achtman-lab.github.io/GrapeTree/MSTree_holder.html)
+ software to construct phylogenetic trees or for visualization.
 
 2. **amr.txt**  
    Antibiotic resistance gene comparison results.
