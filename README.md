@@ -11,9 +11,8 @@
          ▄▄▄▄▄▄▄▄▄█░▌     ▐░▌     ▐░▌       ▐░▌▐░▌          ▐░▌       ▐░▌▐░▌       ▐░▌ ▄▄▄▄█░█▄▄▄▄  ▐░▌   ▐░▌ 
         ▐░░░░░░░░░░░▌     ▐░▌     ▐░▌       ▐░▌▐░▌          ▐░▌       ▐░▌▐░▌       ▐░▌▐░░░░░░░░░░░▌▐░▌     ▐░▌ 
          ▀▀▀▀▀▀▀▀▀▀▀       ▀       ▀         ▀  ▀            ▀         ▀  ▀         ▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀       ▀ 
-A one-stop analysis pipeline for rapid cgMLST, virulence and resistance profiling, and SCCmec typing of *Staphylococcus aureus*.(A pre-release
-This release will be labeled as non-production ready
-)
+A one-stop analysis pipeline for rapid cgMLST, virulence and resistance profiling, and SCCmec typing of *Staphylococcus aureus*.
+<span style="color: yellow;">(A pre-release This release will be labeled as non-production ready)</span>
 
 # **Principle**
 
