@@ -73,3 +73,7 @@ Options:
 
 6. **summary.txt**  
    A summary of all results.
+
+## Contact
+
+If you find any bugs or have better suggestions, feel free to contact [gljiang@stu.suda.edu.cn](mailto:gljiang@stu.suda.edu.cn).
