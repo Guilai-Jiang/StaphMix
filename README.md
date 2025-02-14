@@ -12,3 +12,9 @@ The following tools must be installed in advance:
 
  Additionally, **Python 3.6+** is required.
 
+## Usage
+
+Run the following command to see the options:
+
+```bash
+python staphmix.py --help
