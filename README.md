@@ -9,6 +9,7 @@ The following tools must be installed in advance:
 - **blastn** (Developer version 2.14.0+)
 - **diamond** (Developer version 2.1.8.162)
 - **fastANI** (Developer version 1.33)
+- **amrfinder** (Developer version 3.12.8)
 
  Additionally, **Python 3.6+** is required.
 
