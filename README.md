@@ -6,7 +6,7 @@ A one-stop analysis pipeline for rapid cgMLST, virulence and resistance profilin
 1. **ANI-based simple species identification**  
    Based on ANI (Average Nucleotide Identity), a simple method for species identification.
 
-2. **cgMLST scheme based on 1119 core genes**  
+2. **cgMLST scheme based on 1,119 core genes**  
    Uses a cgMLST scheme developed from 1,119 core genes for bacterial typing.
 
 3. **Virulence gene prediction based on VFDB database**  
