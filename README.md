@@ -5,12 +5,16 @@ A one-stop analysis pipeline for rapid cgMLST, virulence and resistance profilin
 
 1. **ANI-based simple species identification**  
    Based on ANI (Average Nucleotide Identity), a simple method for species identification.
+
 2. **cgMLST scheme based on 1119 core genes**  
-   Uses a cgMLST scheme developed from 1119 core genes for bacterial typing.
+   Uses a cgMLST scheme developed from 1,119 core genes for bacterial typing.
+
 3. **Virulence gene prediction based on VFDB database**  
    Predicts virulence genes by utilizing the VFDB (Virulence Factor Database).
+
 4. **Antibiotic resistance gene prediction based on AMRFinder software**  
    Uses AMRFinder software to predict antibiotic resistance genes.
+
 5. **SCCmec typing based on SCCmecFinder software with the whole_cassette_SCCmec_database_EXTENDED**  
    Predicts SCCmec types based on the SCCmecFinder software and the extended whole_cassette_SCCmec database.
 
