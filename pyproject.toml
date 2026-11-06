@@ -9,7 +9,10 @@ description = "One-stop cgMLST, virulence, resistance and SCCmec typing for Stap
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "GPL-3.0-or-later" }
-authors = [{ name = "Guilai Jiang" }]
+authors = [
+    { name = "Guilai Jiang", email = "gljiang@alu.suda.edu.cn" },
+    { name = "Zhemin Zhou" },
+]
 keywords = ["bioinformatics", "staphylococcus aureus", "cgMLST", "SCCmec", "AMR", "VFDB"]
 classifiers = [
     "Programming Language :: Python :: 3",

@@ -17,12 +17,6 @@ def get_md5(value, dtype=str):
         else:
             return int(m, 16)
     return ''
-def delete(value):
-    if  value < 0:
-        return ''
-    else:
-        return value
-
 
 
 def load_repr_profile(repr_file):

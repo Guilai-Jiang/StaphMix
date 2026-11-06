@@ -31,8 +31,7 @@ Python ≥ 3.8 plus these executables on `PATH`:
 
 ## Install
 
-From a release (no Anaconda account needed; dependencies come from
-conda-forge and bioconda):
+From a release:
 
 ```bash
 conda install -c conda-forge -c bioconda \
@@ -51,15 +50,17 @@ pip install .
 
 ## Database
 
-The reference database is about 1.5 GB and ships as a release asset, not in the
-repository:
+The reference database is about 1.5 GB and is distributed separately from the
+repository. Download the database bundle from the
+[Releases](https://github.com/Guilai-Jiang/StaphMix/releases) page, unpack it,
+and point `--db` at the directory that contains `staph_aureus.cgMLST`:
 
 ```bash
-curl -LO https://github.com/Guilai-Jiang/StaphMix/releases/download/db-v1.0/staphmix-db-1.0.tar.gz
-mkdir -p ~/staphmix-db && tar xzf staphmix-db-1.0.tar.gz -C ~/staphmix-db
+mkdir -p ~/staphmix-db && tar xzf staphmix-db-*.tar.gz -C ~/staphmix-db
+export STAPHMIX_DB=~/staphmix-db
 ```
 
-It is located in this order: `--db` → `$STAPHMIX_DB` →
+The directory is located in this order: `--db` → `$STAPHMIX_DB` →
 `$CONDA_PREFIX/share/staphmix/db` → `./db` next to the source checkout.
 
 | File | Content |

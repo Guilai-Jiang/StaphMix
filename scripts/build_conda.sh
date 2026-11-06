@@ -29,4 +29,4 @@ fi
 
 echo
 echo "Packages written to $OUT"
-echo "Upload with: anaconda upload -u <your-anaconda-user> $OUT/noarch/*.tar.bz2"
+echo "Attach them to a GitHub release, or upload them to an anaconda.org channel."
