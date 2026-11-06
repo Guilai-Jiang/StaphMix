@@ -153,6 +153,16 @@ staphmix -q genome.fna.gz -s -c -m -v -a -p sample -o results -n 8
 - On a cluster with a per-user thread limit, set `OMP_NUM_THREADS=1` and
   control parallelism with `-n`.
 
+## Citation
+
+If you use StaphMix, please cite:
+
+> Jiang G, Guo C, Hua Y, Wu C, Li S, Wang Y, Zhao J, Ji L, Cheng Y, Zhou Z,
+> Wu X, Li H. **Large-scale genomic analysis places Chinese CC398 as a
+> persistent human-associated MSSA lineage apart from the dominant global
+> LA-MRSA clade.** *mSystems*. 2026;11(10).
+> [doi:10.1128/msystems.00621-26](https://doi.org/10.1128/msystems.00621-26)
+
 ## Development
 
 ```bash
