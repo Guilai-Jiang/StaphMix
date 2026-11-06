@@ -178,11 +178,6 @@ process.
 
 GNU General Public License v3.0 or later; see `COPYING`.
 
-## Contributors
-
-- Guilai Jiang ([@Guilai-Jiang](https://github.com/Guilai-Jiang))
-- Zhemin Zhou ([@zheminzhou](https://github.com/zheminzhou))
-
 ## Contact
 
 Bug reports and suggestions: [gljiang@stu.suda.edu.cn](mailto:gljiang@stu.suda.edu.cn)
