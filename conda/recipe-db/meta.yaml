@@ -13,7 +13,7 @@ package:
 #   path: ../../db
 source:
   url: https://github.com/Guilai-Jiang/StaphMix/releases/download/db-v{{ version }}/staphmix-db-{{ version }}.tar.gz
-  sha256: 0000000000000000000000000000000000000000000000000000000000000000
+  sha256: be48d047e941e1d93c270a33d071b56769c69bc09f1daac854dd9aae2e42869a
 
 build:
   noarch: generic

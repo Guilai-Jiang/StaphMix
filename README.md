@@ -50,13 +50,13 @@ pip install .
 
 ## Database
 
-The reference database is about 1.5 GB and is distributed separately from the
-repository. Download the database bundle from the
-[Releases](https://github.com/Guilai-Jiang/StaphMix/releases) page, unpack it,
-and point `--db` at the directory that contains `staph_aureus.cgMLST`:
+The reference database is about 1.5 GB (650 MB compressed) and is distributed
+separately from the repository:
 
 ```bash
-mkdir -p ~/staphmix-db && tar xzf staphmix-db-*.tar.gz -C ~/staphmix-db
+curl -LO https://github.com/Guilai-Jiang/StaphMix/releases/download/db-v1.0/staphmix-db-1.0.tar.gz
+echo "be48d047e941e1d93c270a33d071b56769c69bc09f1daac854dd9aae2e42869a  staphmix-db-1.0.tar.gz" | sha256sum -c -
+mkdir -p ~/staphmix-db && tar xzf staphmix-db-1.0.tar.gz -C ~/staphmix-db
 export STAPHMIX_DB=~/staphmix-db
 ```
 
@@ -129,4 +129,8 @@ own terms; see [docs/DATABASE-LICENSES.md](docs/DATABASE-LICENSES.md).
 
 ## Contact
 
-[gljiang@alu.suda.edu.cn](mailto:gljiang@alu.suda.edu.cn)
+Questions, bug reports and suggestions are very welcome. Please open an
+[issue](https://github.com/Guilai-Jiang/StaphMix/issues) or write to
+[gljiang@alu.suda.edu.cn](mailto:gljiang@alu.suda.edu.cn) — we are happy to
+discuss the pipeline, the databases or anything related to *S. aureus*
+genomics.

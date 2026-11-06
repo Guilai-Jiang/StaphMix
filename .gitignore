@@ -16,3 +16,6 @@ dist/
 .vscode/
 .idea/
 *.swp
+
+# Database release archives
+staphmix-db-*.tar.gz
