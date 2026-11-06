@@ -10,7 +10,27 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install
+        run: pip install .[test]
+
+      - name: Test
+        run: pytest -q
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -22,6 +42,14 @@ jobs:
           channels: conda-forge,bioconda
           channel-priority: strict
           conda-remove-defaults: true
+
+      - name: Check version matches tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          grep -q "__version__ = \"${tag}\"" staphmix/__init__.py \
+            || { echo "::error::tag ${GITHUB_REF_NAME} does not match staphmix/__init__.py"; exit 1; }
 
       - name: Install conda-build
         shell: bash -el {0}

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=64"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,8 +7,9 @@ name = "staphmix"
 dynamic = ["version"]
 description = "One-stop cgMLST, virulence, resistance and SCCmec typing for Staphylococcus aureus genomes"
 readme = "README.md"
-requires-python = ">=3.8"
-license = { text = "GPL-3.0-or-later" }
+requires-python = ">=3.9"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE", "COPYING"]
 authors = [
     { name = "Guilai Jiang", email = "gljiang@alu.suda.edu.cn" },
     { name = "Zhemin Zhou" },
@@ -16,7 +17,6 @@ authors = [
 keywords = ["bioinformatics", "staphylococcus aureus", "cgMLST", "SCCmec", "AMR", "VFDB"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Operating System :: POSIX :: Linux",
 ]
@@ -27,6 +27,9 @@ dependencies = [
     "biopython",
     "click",
 ]
+
+[project.optional-dependencies]
+test = ["pytest"]
 
 [project.urls]
 Homepage = "https://github.com/Guilai-Jiang/StaphMix"
@@ -41,3 +44,6 @@ version = { attr = "staphmix.__version__" }
 
 [tool.setuptools.packages.find]
 include = ["staphmix*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
