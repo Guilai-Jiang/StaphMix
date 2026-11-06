@@ -81,6 +81,8 @@ anaconda upload -u <anaconda-user> dist/noarch/staphmix-db-*.conda
 
 ## Checklist
 
+- [ ] `LICENSE` (grant) and `COPYING` (GPLv3 text) are both present and the
+      version in the metadata is `GPL-3.0-or-later`
 - [ ] `db/` and `db.zip` are not committed (see `.gitignore`)
 - [ ] `scripts/build_db_archive.sh` only packs the seven files used at runtime
 - [ ] the database tarball is attached to a `db-*` release

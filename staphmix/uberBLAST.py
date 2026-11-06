@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 import os, sys, tempfile, numpy as np, pandas as pd, re, gzip
 from numba import jit
 from subprocess import Popen, PIPE

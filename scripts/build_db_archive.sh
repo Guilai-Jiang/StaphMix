@@ -38,6 +38,10 @@ for ext in nhr nin nsq; do
   [[ -f "$src" ]] && cp "$src" "$TMP/"
 done
 
+# Licence terms travel with the data.
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cp "$ROOT/docs/DATABASE-LICENSES.md" "$TMP/"
+
 tar -czf "$OUT" -C "$TMP" .
 echo "Wrote $OUT"
 sha256sum "$OUT"

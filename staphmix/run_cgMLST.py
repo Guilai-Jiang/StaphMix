@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 import numpy as np, pandas as pd,os
 import hashlib, pickle
 from collections import OrderedDict

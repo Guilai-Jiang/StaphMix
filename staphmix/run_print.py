@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 class Color:
         YELLOW = "\033[93m"

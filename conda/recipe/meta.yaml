@@ -49,7 +49,10 @@ test:
 about:
   home: https://github.com/Guilai-Jiang/StaphMix
   license: GPL-3.0-or-later
-  license_file: COPYING
+  license_family: GPL3
+  license_file:
+    - LICENSE
+    - COPYING
   summary: One-stop cgMLST, virulence, resistance and SCCmec typing for Staphylococcus aureus
   description: |
     StaphMix profiles Staphylococcus aureus genomes: ANI-based confirmation,

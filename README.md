@@ -1,117 +1,79 @@
 # StaphMix
 
-A one-stop analysis pipeline for rapid cgMLST, virulence and resistance
-profiling, and SCCmec typing of *Staphylococcus aureus*.
+[![build](https://github.com/Guilai-Jiang/StaphMix/actions/workflows/build-conda.yml/badge.svg)](https://github.com/Guilai-Jiang/StaphMix/actions/workflows/build-conda.yml)
+[![license](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](LICENSE)
+![python](https://img.shields.io/badge/python-3.8%2B-blue)
 
-## Principles
+Genome-to-report profiling for *Staphylococcus aureus*: species check, cgMLST
+and HierCC assignment, SCCmec type, virulence genes and acquired resistance
+genes in a single pass.
 
-1. **Species confirmation** — fastANI against a *S. aureus* reference genome.
-2. **cgMLST** — allele calling for a 1,119-gene core genome scheme, plus
-   HierCC cluster assignment (HC6 and HC650).
-3. **Virulence genes** — DIAMOND blastx against VFDB set B.
-4. **Antimicrobial resistance** — AMRFinderPlus.
-5. **SCCmec typing** — BLASTn against an extended whole-cassette SCCmec
-   database.
+| Step | Method |
+|---|---|
+| Species check | fastANI against a *S. aureus* reference (≥ 95 % ANI) |
+| cgMLST / HierCC | 1,119 core genes, md5 allele profiles, 31,410-genome reference set |
+| SCCmec | BLASTn against an extended whole-cassette database |
+| Virulence | DIAMOND blastx against VFDB set B |
+| Resistance | AMRFinderPlus |
+
+Runtime is roughly 4–5 minutes for a 2.8 Mb genome with 8 threads.
 
 ## Requirements
 
-Python 3.8+ and the following executables on `PATH`:
+Python ≥ 3.8 plus these executables on `PATH`:
 
 | Tool | Version |
 |---|---|
-| makeblastdb / blastn | >= 2.14 |
-| diamond | >= 2.2 |
-| fastANI | >= 1.33 |
-| amrfinder (AMRFinderPlus) | >= 3.11 |
+| `makeblastdb`, `blastn` | ≥ 2.14 |
+| `diamond` | ≥ 2.2 |
+| `fastANI` | ≥ 1.33 |
+| `amrfinder` | ≥ 3.11 |
 
-Python dependencies (installed automatically): numpy, pandas, numba,
-biopython, click.
+## Install
 
-## Installation
-
-### Conda from the GitHub release (no Anaconda account needed)
-
-Every tagged release carries the built `staphmix` package. Install it by URL;
-the external tools come from conda-forge and bioconda:
+From a release (no Anaconda account needed; dependencies come from
+conda-forge and bioconda):
 
 ```bash
 conda install -c conda-forge -c bioconda \
   https://github.com/Guilai-Jiang/StaphMix/releases/download/v0.1.0/staphmix-0.1.0-py_0.conda
 ```
 
-The reference database is distributed as a separate tarball (about 1.5 GB) on
-the same Releases page:
-
-```bash
-curl -LO https://github.com/Guilai-Jiang/StaphMix/releases/download/db-v1.0/staphmix-db-1.0.tar.gz
-mkdir -p ~/staphmix-db && tar xzf staphmix-db-1.0.tar.gz -C ~/staphmix-db
-export STAPHMIX_DB=~/staphmix-db        # or pass --db ~/staphmix-db
-```
-
-`staphmix-db` is also available as a conda package if you prefer to install it
-by URL (build it with `conda build conda/recipe-db`):
-
-```bash
-conda install -c conda-forge -c bioconda \
-  https://github.com/Guilai-Jiang/StaphMix/releases/download/db-v1.0/staphmix-db-1.0-0.conda
-```
-
-### Conda from an anaconda.org channel
-
-If the packages were uploaded to an anaconda.org user:
-
-```bash
-conda install -c <anaconda-user> -c conda-forge -c bioconda staphmix staphmix-db
-```
-
-### From source
+From source:
 
 ```bash
 git clone https://github.com/Guilai-Jiang/StaphMix.git
 cd StaphMix
-conda env create -n staphmix -f environment.yml   # or install the tools yourself
+conda env create -f environment.yml
 conda activate staphmix
 pip install .
-staphmix --help
 ```
 
 ## Database
 
-StaphMix looks for its database in this order:
+The reference database is about 1.5 GB and ships as a release asset, not in the
+repository:
 
-1. `--db PATH`
-2. `$STAPHMIX_DB`
-3. `$CONDA_PREFIX/share/staphmix/db` (installed `staphmix-db` package)
-4. `./db` next to the source checkout
+```bash
+curl -LO https://github.com/Guilai-Jiang/StaphMix/releases/download/db-v1.0/staphmix-db-1.0.tar.gz
+mkdir -p ~/staphmix-db && tar xzf staphmix-db-1.0.tar.gz -C ~/staphmix-db
+```
 
-The directory must contain:
+It is located in this order: `--db` → `$STAPHMIX_DB` →
+`$CONDA_PREFIX/share/staphmix/db` → `./db` next to the source checkout.
 
 | File | Content |
 |---|---|
-| `staph_aureus.cgMLST` | list of the 1,119 core genes |
-| `MLSTdb0.1.fasta` | reference allele sequences for every core gene |
-| `new_profile_md5.csv` | md5 allele profiles of 31,410 reference genomes |
-| `new_HierCC.HierCC` | HierCC cluster levels for the same genomes |
-| `GCF_000025145.1_ASM2514v1_genomic.fna` | *S. aureus* reference for fastANI |
-| `VFDB_setB_pro.fas` | VFDB set B protein database |
-| `whole_cassette_SCCmec_database_EXTENDED_20171117.fasta` | SCCmec cassette database |
+| `staph_aureus.cgMLST` | 1,119 core gene identifiers |
+| `MLSTdb0.1.fasta` | reference allele for every core gene |
+| `new_profile_md5.csv` | md5 allele profiles, 31,410 genomes |
+| `new_HierCC.HierCC` | HierCC levels for the same genomes |
+| `GCF_000025145.1_ASM2514v1_genomic.fna` | fastANI reference genome |
+| `VFDB_setB_pro.fas` | VFDB set B proteins |
+| `whole_cassette_SCCmec_database_EXTENDED_20171117.fasta` | SCCmec cassettes |
 
-A parsed copy of the md5 profile (`new_profile_md5.csv.pkl`) is created on the
-first cgMLST run to make later runs start in seconds instead of minutes.
-
-### Building the database package
-
-```bash
-./scripts/build_db_archive.sh db                 # creates staphmix-db-1.0.tar.gz
-# upload the tarball as a GitHub release asset, then fill url/sha256 in
-# conda/recipe-db/meta.yaml and build:
-conda build conda/recipe-db
-anaconda upload -u <your-anaconda-user> \
-  /path/to/conda-bld/noarch/staphmix-db-1.0-*.tar.bz2
-```
-
-Please check the redistribution terms of the bundled databases (VFDB,
-SCCmec, cgMLST/HierCC) before publishing a database package.
+The first cgMLST run also writes `new_profile_md5.csv.pkl` (233 MB); later runs
+start in ~2 s instead of ~20 s.
 
 ## Usage
 
@@ -121,41 +83,36 @@ staphmix -q genome.fna.gz -s -c -m -v -a -p sample -o results -n 8
 
 | Option | Meaning |
 |---|---|
-| `-q, --query` | input genome (fasta/fastq, optionally gzipped) |
-| `-s, --species` | run the ANI check (stops if not *S. aureus*) |
-| `-c, --cgmlst` | run cgMLST typing and HierCC assignment |
-| `-m, --sccmec` | run SCCmec typing |
-| `-v, --vf` | run virulence gene comparison |
-| `-a, --amr` | run antimicrobial resistance comparison |
-| `-p, --prefix` | prefix for the output files |
-| `-o, --outdir` | output directory (created if needed) |
-| `-n, --n_thread` | number of threads (default 8) |
-| `--db` | database directory (see above) |
+| `-q, --query` | input genome: fasta/fastq, optionally gzipped |
+| `-s, --species` | ANI check; stops if the genome is not *S. aureus* |
+| `-c, --cgmlst` | cgMLST calling and HierCC assignment |
+| `-m, --sccmec` | SCCmec typing |
+| `-v, --vf` | virulence gene comparison |
+| `-a, --amr` | resistance gene comparison |
+| `-p, --prefix` | output file prefix |
+| `-o, --outdir` | output directory |
+| `-n, --n_thread` | threads (default 8) |
+| `--db` | database directory |
 
 ## Output
 
 | File | Content |
 |---|---|
-| `*.summary.txt` | one row with all results: HC6, HC650, SCCmec type, virulence scores, MRSA/MSSA, resistance gene counts |
+| `*.summary.txt` | one row: HC6, HC650, SCCmec type, virulence scores, MRSA/MSSA, resistance counts |
 | `*.ani.txt` | fastANI result |
-| `*.alleles.profile` | md5 allele profile for 1,119 genes (GrapeTree compatible) |
+| `*.alleles.profile` | md5 allele profile, 1,119 loci (GrapeTree compatible) |
 | `*.sccmec.txt` | SCCmec BLAST hits |
 | `*.vf.txt` | virulence gene hits |
 | `*.amr.txt` | resistance gene hits |
 
 ## Notes
 
-- AMRFinderPlus does not bundle its own database. Install it with
-  `amrfinder -u`, or point `AMRFINDER_DB` at a downloaded release. The conda
-  package works normally once the environment is activated.
-- The tool versions above are the minimum tested; newer releases of BLAST,
-  DIAMOND, fastANI and AMRFinderPlus are compatible.
-- On a cluster with a per-user thread limit, set `OMP_NUM_THREADS=1` and
+- AMRFinderPlus does not ship its database. Run `amrfinder -u` once or set
+  `AMRFINDER_DB`.
+- On clusters with a per-user thread limit, export `OMP_NUM_THREADS=1` and
   control parallelism with `-n`.
 
 ## Citation
-
-If you use StaphMix, please cite:
 
 > Jiang G, Guo C, Hua Y, Wu C, Li S, Wang Y, Zhao J, Ji L, Cheng Y, Zhou Z,
 > Wu X, Li H. **Large-scale genomic analysis places Chinese CC398 as a
@@ -163,21 +120,12 @@ If you use StaphMix, please cite:
 > LA-MRSA clade.** *mSystems*. 2026;11(10).
 > [doi:10.1128/msystems.00621-26](https://doi.org/10.1128/msystems.00621-26)
 
-## Development
-
-```bash
-./scripts/build_conda.sh          # build the code package from this checkout
-BUILD_DB=1 ./scripts/build_conda.sh   # also build the database package
-```
-
-`scripts/build_db_archive.sh` creates the database tarball used by
-`staphmix-db`. See [docs/PUBLISHING.md](docs/PUBLISHING.md) for the release
-process.
-
 ## License
 
-GNU General Public License v3.0 or later; see `COPYING`.
+GPL-3.0-or-later. See [LICENSE](LICENSE) for the grant and [COPYING](COPYING)
+for the full GPLv3 text. The reference databases are distributed under their
+own terms; see [docs/DATABASE-LICENSES.md](docs/DATABASE-LICENSES.md).
 
 ## Contact
 
-Bug reports and suggestions: [gljiang@stu.suda.edu.cn](mailto:gljiang@stu.suda.edu.cn)
+[gljiang@alu.suda.edu.cn](mailto:gljiang@alu.suda.edu.cn)

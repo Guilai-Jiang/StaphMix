@@ -34,7 +34,8 @@ test:
 
 about:
   home: https://github.com/Guilai-Jiang/StaphMix
-  license: See README
+  license: See DATABASE-LICENSES.md
+  license_file: DATABASE-LICENSES.md
   summary: Reference databases for StaphMix (cgMLST scheme, HierCC, VFDB, SCCmec)
   description: |
     Database bundle required by StaphMix. It contains the 1119-gene S. aureus

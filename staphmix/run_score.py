@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 enterotoxin_genes = {'sea' : '1','selq' : '1','selk' : '1','seb' : '1','seh' : '1','sed' : '1',
                      'see' : '1','sell' : '1','sec' : '1','sec3' : '1','yent2' : '1','yent1' : '1',
