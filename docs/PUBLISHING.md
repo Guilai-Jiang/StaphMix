@@ -1,73 +1,92 @@
 # Publishing StaphMix
 
-StaphMix is distributed as two conda packages:
+StaphMix can be distributed entirely through GitHub, without an Anaconda
+account:
 
-- `staphmix` — the code (a few tens of KB), built from this repository.
-- `staphmix-db` — the reference databases (~1.5 GB uncompressed), built from a
-  release tarball because Git repositories should not carry files that large.
+- `staphmix` — the code package (a few tens of KB), built by CI and attached to
+  each release.
+- `staphmix-db` — the reference databases (~1.5 GB uncompressed), distributed
+  as a release tarball because Git repositories should not carry files that
+  large. A conda package is optional.
 
-## 1. Push the code
+## 1. Push the code and tag a release
 
 ```bash
 git add .
 git commit -m "Package StaphMix"
-git push origin main
-git tag v0.1.0 && git push origin v0.1.0
+git push origin StaphMix
+
+git tag v0.1.0
+git push origin v0.1.0
 ```
 
-The GitHub Actions workflow in `.github/workflows/build-conda.yml` builds the
-`staphmix` package for every pull request and publishes it to anaconda.org for
-tags (requires the `ANACONDA_API_TOKEN` secret and the `ANACONDA_USER`
-repository variable).
+The workflow in `.github/workflows/build-conda.yml` runs on every pull request
+and, for tags, builds `staphmix` and attaches the `.conda` file to the GitHub
+release. No secret needs to be configured: it uses the default
+`GITHUB_TOKEN` with `contents: write`.
 
-## 2. Create and publish the database tarball
+After the run finishes, the release contains:
+
+```
+staphmix-0.1.0-py_0.conda
+```
+
+Users install it directly by URL:
+
+```bash
+conda install -c conda-forge -c bioconda \
+  https://github.com/Guilai-Jiang/StaphMix/releases/download/v0.1.0/staphmix-0.1.0-py_0.conda
+```
+
+## 2. Create and publish the database
 
 ```bash
 ./scripts/build_db_archive.sh db
 # staphmix-db-1.0.tar.gz + sha256
 ```
 
-Create a GitHub release tagged `db-v1.0` and attach the tarball. Copy the
-printed sha256 into `conda/recipe-db/meta.yaml`. The default URL in that recipe
-already points at:
+Create a release tagged `db-v1.0` and attach the tarball. GitHub allows release
+assets up to 2 GB, so the archive fits. Zenodo, OSF or an institutional server
+work equally well.
 
-```
-https://github.com/Guilai-Jiang/StaphMix/releases/download/db-v1.0/staphmix-db-1.0.tar.gz
-```
-
-GitHub allows release assets up to 2 GB, so the archive fits. Zenodo, OSF or
-an institutional server work equally well — only the URL matters.
-
-## 3. Build and upload the packages
+Users then run:
 
 ```bash
-# code package: the script stages a copy without db/ (the recipe's local
-# source path would otherwise copy the whole 1.5 GB database directory)
-./scripts/build_conda.sh
-
-conda build conda/recipe-db --output-folder dist   # database
-
-anaconda upload -u <your-anaconda-user> dist/conda/noarch/staphmix-*.conda
-anaconda upload -u <your-anaconda-user> dist/noarch/staphmix-db-*.conda
+curl -LO https://github.com/Guilai-Jiang/StaphMix/releases/download/db-v1.0/staphmix-db-1.0.tar.gz
+mkdir -p ~/staphmix-db && tar xzf staphmix-db-1.0.tar.gz -C ~/staphmix-db
+export STAPHMIX_DB=~/staphmix-db
 ```
 
-The database package is large; anaconda.org accepts it, but uploads can take a
-while. If you prefer, keep `staphmix-db` on GitHub releases only and document
-the `--db` option instead.
+### Optional: database as a conda package
 
-## 4. Install as a user
+Put the tarball URL and sha256 into `conda/recipe-db/meta.yaml`, then:
 
 ```bash
-conda install -c <your-anaconda-user> -c conda-forge -c bioconda staphmix staphmix-db
-staphmix --version
+conda build conda/recipe-db --output-folder dist
+```
+
+Attach `dist/noarch/staphmix-db-1.0-0.conda` to the `db-v1.0` release as well.
+It can be installed by URL like the code package, which puts the files in
+`$CONDA_PREFIX/share/staphmix/db` automatically.
+
+## 3. Optional: anaconda.org
+
+An anaconda.org account is not required. If you want the shorter
+`conda install -c <user> staphmix` form, upload the built packages:
+
+```bash
+anaconda upload -u <anaconda-user> dist/noarch/staphmix-*.conda
+anaconda upload -u <anaconda-user> dist/noarch/staphmix-db-*.conda
 ```
 
 ## Checklist
 
 - [ ] `db/` and `db.zip` are not committed (see `.gitignore`)
 - [ ] `scripts/build_db_archive.sh` only packs the seven files used at runtime
-- [ ] the sha256 in `conda/recipe-db/meta.yaml` matches the uploaded tarball
+- [ ] the database tarball is attached to a `db-*` release
+- [ ] the tag release contains `staphmix-*.conda`
 - [ ] redistribution terms of VFDB, the SCCmec database and the cgMLST/HierCC
-      data allow bundling, or the database is downloaded by the user instead
+      data allow bundling — otherwise distribute only the code and let users
+      supply `--db`
 - [ ] `staphmix --help`, `staphmix --version` work in a clean environment
 - [ ] a test genome runs end to end

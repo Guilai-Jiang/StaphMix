@@ -29,17 +29,40 @@ biopython, click.
 
 ## Installation
 
-### Conda (recommended)
+### Conda from the GitHub release (no Anaconda account needed)
 
-The code and the reference databases are distributed as two packages, because
-the database is about 1.5 GB:
+Every tagged release carries the built `staphmix` package. Install it by URL;
+the external tools come from conda-forge and bioconda:
 
 ```bash
-conda install -c <your-channel> -c conda-forge -c bioconda staphmix staphmix-db
+conda install -c conda-forge -c bioconda \
+  https://github.com/Guilai-Jiang/StaphMix/releases/download/v0.1.0/staphmix-0.1.0-py_0.conda
 ```
 
-Without the database you can still install the code package and supply a
-database directory yourself (see below).
+The reference database is distributed as a separate tarball (about 1.5 GB) on
+the same Releases page:
+
+```bash
+curl -LO https://github.com/Guilai-Jiang/StaphMix/releases/download/db-v1.0/staphmix-db-1.0.tar.gz
+mkdir -p ~/staphmix-db && tar xzf staphmix-db-1.0.tar.gz -C ~/staphmix-db
+export STAPHMIX_DB=~/staphmix-db        # or pass --db ~/staphmix-db
+```
+
+`staphmix-db` is also available as a conda package if you prefer to install it
+by URL (build it with `conda build conda/recipe-db`):
+
+```bash
+conda install -c conda-forge -c bioconda \
+  https://github.com/Guilai-Jiang/StaphMix/releases/download/db-v1.0/staphmix-db-1.0-0.conda
+```
+
+### Conda from an anaconda.org channel
+
+If the packages were uploaded to an anaconda.org user:
+
+```bash
+conda install -c <anaconda-user> -c conda-forge -c bioconda staphmix staphmix-db
+```
 
 ### From source
 
