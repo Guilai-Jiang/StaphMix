@@ -1,0 +1,44 @@
+{% set name = "staphmix-db" %}
+{% set version = "1.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+# The database is too large for the Git repository. Build scripts/build_db_archive.sh,
+# upload the tarball as a GitHub release asset, then fill the url and sha256 here.
+# For a local build, replace this block with:
+#
+# source:
+#   path: ../../db
+source:
+  url: https://github.com/Guilai-Jiang/StaphMix/releases/download/db-v{{ version }}/staphmix-db-{{ version }}.tar.gz
+  sha256: 0000000000000000000000000000000000000000000000000000000000000000
+
+build:
+  noarch: generic
+  number: 0
+  script:
+    - mkdir -p "$PREFIX/share/staphmix/db"
+    - cp -r ./* "$PREFIX/share/staphmix/db/"
+
+requirements:
+  run:
+    - blast >=2.14
+
+test:
+  commands:
+    - test -f "$PREFIX/share/staphmix/db/staph_aureus.cgMLST"
+    - test -f "$PREFIX/share/staphmix/db/new_profile_md5.csv"
+    - test -f "$PREFIX/share/staphmix/db/new_HierCC.HierCC"
+
+about:
+  home: https://github.com/Guilai-Jiang/StaphMix
+  license: See README
+  summary: Reference databases for StaphMix (cgMLST scheme, HierCC, VFDB, SCCmec)
+  description: |
+    Database bundle required by StaphMix. It contains the 1119-gene S. aureus
+    cgMLST scheme and alleles, the md5 reference profile with HierCC levels,
+    the VFDB protein set, the extended SCCmec cassette database and the
+    species reference genome. Please cite the original sources of each
+    database when using StaphMix (see README).

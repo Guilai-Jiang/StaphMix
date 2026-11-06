@@ -1,0 +1,18 @@
+# Databases are distributed separately (see README)
+db/
+db.zip
+*.pkl
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+
+# Editors
+.vscode/
+.idea/
+*.swp

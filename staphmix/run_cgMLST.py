@@ -1,17 +1,10 @@
 import numpy as np, pandas as pd,os
-import hashlib
+import hashlib, pickle
 from collections import OrderedDict
 import warnings
-from .configure import db_list, scheme_info
+from .configure import db_path, scheme_info
 
 from .uberBLAST import uberBlast, readFastq, rc
-
-refseqs = db_list['refseqs']
-core_genes = db_list['core_genes']
-repr = db_list['repr']
-hcc = db_list['hcc']
-
-
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -22,9 +15,7 @@ def get_md5(value, dtype=str):
             return m
         else:
             return int(m, 16)
-    else:
-        pass
-    
+    return ''
 def delete(value):
     if  value < 0:
         return ''
@@ -33,13 +24,35 @@ def delete(value):
 
 
 
+def load_repr_profile(repr_file):
+    '''Load the md5 profile table, caching the parsed DataFrame as pickle.
+
+    Parsing the 1.1 GB TSV costs 20 s (warm cache) to minutes (cold cache);
+    unpickling it takes ~2 s. The cache is rebuilt whenever the source file
+    is newer than the pickle.
+    '''
+    cache = repr_file + '.pkl'
+    if os.path.exists(cache) and os.path.getmtime(cache) >= os.path.getmtime(repr_file):
+        try:
+            with open(cache, 'rb') as fin:
+                return pickle.load(fin)
+        except Exception as e:
+            print(f'Warning: failed to load profile cache {cache} ({e}); rebuilding')
+    repr_profile = pd.read_csv(repr_file, sep='\t',na_values=['None'],dtype=str)
+    repr_profile = repr_profile.set_index(repr_profile.columns[0])
+    try:
+        with open(cache, 'wb') as fout:
+            pickle.dump(repr_profile, fout, protocol=5)
+    except OSError as e:
+        print(f'Warning: could not write profile cache {cache} ({e})')
+    return repr_profile
+
+
 def run_cgmlst(query, n_thread) :
     alleles = nomenclature(query, n_thread)
-    repr_profile = pd.read_csv(repr, sep='\t',na_values=['None'],dtype=str)
-    #print(repr_profile)
-    repr_profile = repr_profile.set_index(repr_profile.columns[0])
+    repr_profile = load_repr_profile(db_path('repr'))
 
-    repr_hcc = pd.read_csv(hcc, sep='\t')
+    repr_hcc = pd.read_csv(db_path('hcc'), sep='\t')
     repr_hcc = repr_hcc.set_index(repr_hcc.columns[0])
     #print(repr_hcc)
     profile = np.array([('-' if v.startswith('-') else v) for v in [v.get('value_md5', '-') for k, v in sorted(alleles.items())]])
@@ -51,6 +64,7 @@ def run_cgmlst(query, n_thread) :
 
     max_idx = np.argmax(relshare)
     min_dist = int(profile.size-relshare[max_idx]+0.5)
+    min_dist = max(0, min(profile.size, min_dist))
     ref_repr = repr_profile.index[max_idx][:13]
     hc = repr_hcc.loc[ref_repr].values.astype(str).tolist()
     hc[:min_dist] = ['ND'] * min_dist
@@ -65,6 +79,8 @@ def run_cgmlst(query, n_thread) :
 
     
 def nomenclature(query, n_thread=8) :
+    core_genes = db_path('core_genes')
+    refseqs = db_path('refseqs')
     core = {}
     with open(core_genes, 'rt') as fin :
         for line in fin :
@@ -167,4 +183,3 @@ def nomenclature(query, n_thread=8) :
 # if __name__ == '__main__':
 #     main()
 
-#cgmlst('/Terra/guilai/staph_aureus/staph_cgmlst/saureus_2927_fasta/seq/GCA_903812305.1_22276_6_90_genomic.fna.gz')

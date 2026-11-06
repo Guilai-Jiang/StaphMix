@@ -2,27 +2,38 @@ import subprocess,re
 from .configure import exe
 
 def run_diamond_blastx(query,db,cpus,ident=90, cov=0, sum_cov=90, n_hits=3000, topOnly=True, gcode=1):
-    diamond = exe['diamond']
+    cmd = [exe['diamond'], 'blastx',
+           '--threads', str(cpus),
+           '--query', query,
+           '--db', db,
+           '-k', str(n_hits),
+           '--query-gencode', str(gcode),
+           # DIAMOND wants the format and every field as separate arguments
+           '--outfmt', '6', 'qseqid', 'sseqid', 'pident', 'length',
+           'mismatch', 'gapopen', 'qstart', 'qend', 'sstart', 'send',
+           'evalue', 'score', 'qlen', 'slen']
+    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if p.returncode != 0:
+        raise RuntimeError('DIAMOND blastx failed:\n{0}'.format(p.stderr.strip()))
     bsn = []
-    blastx_cmd = f'{diamond} blastx --threads {cpus} --query {query} --db {db} -k {n_hits} --query-gencode {gcode} --outfmt 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue score qlen slen'
-    p = subprocess.run(blastx_cmd, shell=True,stdout=subprocess.PIPE, text=True)
-    if p.returncode == 0:
-        for line in p.stdout.strip().split('\n') :
-            part = line.strip().split('\t')
-            part[2:] = [float(p) for p in part[2:]]
-            if part[2] < ident :
-                continue
-            part[5] = '+'
-            if part[9] < part[8] :
-                part[8:10], part[5] = part[9:7:-1], '-'
-            elif part[7] < part[6] :
-                part[6:8], part[5] = part[7:5:-1], '-'
+    for line in p.stdout.splitlines() :
+        part = line.strip().split('\t')
+        if len(part) < 14 :
+            continue
+        part[2:] = [float(v) for v in part[2:]]
+        if part[2] < ident :
+            continue
+        part[5] = '+'
+        if part[9] < part[8] :
+            part[8:10], part[5] = part[9:7:-1], '-'
+        elif part[7] < part[6] :
+            part[6:8], part[5] = part[7:5:-1], '-'
 
-            if part[9]-part[8]+1 < 10 :
-                continue
-            if (part[9]-part[8]+1)*100. < cov*part[13] :
-                continue
-            bsn.append(part)
+        if part[9]-part[8]+1 < 10 :
+            continue
+        if (part[9]-part[8]+1)*100. < cov*part[13] :
+            continue
+        bsn.append(part)
 
     if topOnly :
         bsn = sorted(bsn, key=lambda x:[x[0], x[6], x[7]])
@@ -36,7 +47,7 @@ def run_diamond_blastx(query,db,cpus,ident=90, cov=0, sum_cov=90, n_hits=3000, t
                 if o >= 0.4*(b1[7]-b1[6]+1) or o > 0.4*(b2[7]-b2[6]+1) :
                     if b1[2] >= b2[2]+1 and b1[11] >= b2[11] :
                         b2[0] = ''
-                    elif b1[2] >= b1[2]+1 and b2[11] >= b1[11] :
+                    elif b2[2] >= b1[2]+1 and b2[11] >= b1[11] :
                         b1[0] = ''
         bsn = sorted([b for  b in bsn if b[0] != ''], key=lambda x:(x[1], x[8], x[9]))
 
@@ -90,7 +101,7 @@ def run_diamond_blastx(query,db,cpus,ident=90, cov=0, sum_cov=90, n_hits=3000, t
 def runVFDB(query,db,cpus):
     output = run_diamond_blastx(query,db,cpus,ident=90, cov=0, sum_cov=90, n_hits=3000, topOnly=True,  gcode=1)
     data = []
-    with open('/home/guilai/software/staphalytics/db/VFDB_setB_pro.fas', 'rt') as fin :
+    with open(db, 'rt') as fin :
         for line in fin:
             if not line.startswith('>') :
                 continue
@@ -134,5 +145,3 @@ def runVFDB(query,db,cpus):
     return data
 
 
-#runVFDB('/home/guilai/software/staphalytics/run/HC0304799.fasta','/home/guilai/software/StaphMix/db/VFDB_setB_pro.fas')
-#run_diamond_blastx('/home/guilai/software/staphalytics/run/HC0304799.fasta','/home/guilai/software/staphalytics/db/VFDB_setB_pro.fas')

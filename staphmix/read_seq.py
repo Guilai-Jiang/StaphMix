@@ -31,7 +31,7 @@ def fastq_to_fasta(content):
     for i in range(0, len(lines), 4):
         header = lines[i]
         sequence = lines[i + 1]
-        fasta_content += f'{header[1:]}\n{sequence}\n'
+        fasta_content += f'>{header[1:]}\n{sequence}\n'
     return fasta_content
 
 def write_temp_file(content, file_type,work_dir):
@@ -50,4 +50,3 @@ def process_input_file(input_file,work_dir):
     return temp_file_path
 
 
-#process_input_file('/home/guilai/staph_aureus/staph_cgmlst/saureus_2927_fasta/seq/GCA_903813275.1_22276_7_164_genomic.fna.gz')

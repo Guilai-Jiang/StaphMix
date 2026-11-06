@@ -119,12 +119,12 @@ def parseDiamond(data):
             cigar = [[int(n) * 3, t] for n, t in re.findall(r'(\d+)([A-Z])', part[5])]
             cl = np.sum([c[0] for c in cigar])
             variation = float(part[12][5:]) * 3 if part[12].startswith('NM:') else float(
-                re.findall('NM:i:(\d+)', line)[0]) * 3
+                re.findall(r'NM:i:(\d+)', line)[0]) * 3
 
             iden = 1 - round(variation / cl, 3)
             if iden < min_id: continue
             qf, rf = int(qf), int(rf)
-            qs = int(part[18][5:]) if part[18].startswith('ZS:') else int(re.findall('ZS:i:(\d+)', line)[0])
+            qs = int(part[18][5:]) if part[18].startswith('ZS:') else int(re.findall(r'ZS:i:(\d+)', line)[0])
 
             rm = int(np.sum([c[0] for c in cigar if c[1] in {'M', 'D'}]) / 3)
             if rf <= 3:
@@ -139,7 +139,7 @@ def parseDiamond(data):
                 cigar = list(reversed(cigar))
 
             cd = [c[0] for c in cigar if c[1] != 'M']
-            score = int(part[14][5:]) if part[14].startswith('ZR:') else int(re.findall('ZR:i:(\d+)', line)[0])
+            score = int(part[14][5:]) if part[14].startswith('ZR:') else int(re.findall(r'ZR:i:(\d+)', line)[0])
             blastab.append(
                 [qn, rn, iden, cl, int(variation - sum(cd)), len(cd), qs, qe, rs, r_e, 0.0, score, ql, rl, cigar])
     try:
@@ -390,9 +390,16 @@ def poolBlast(params):
 
     blastn, refDb, qry, min_id, min_cov, min_ratio = params
     outfile = '{0}.bsn'.format(qry)
-    blast_cmd = '{blastn} -db {refDb} -query {qry} -word_size 11 -out {qry}.bsn -perc_identity {min_id} -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue score qlen slen qseq sseq" -qcov_hsp_perc {min_ratio} -num_alignments 1000 -task blastn -evalue 1e-2 -dbsize 5000000 -reward 2 -penalty -3 -gapopen 6 -gapextend 2'.format(
-        blastn=blastn, refDb=refDb, qry=qry, min_id=min_id * 100, min_ratio=min_ratio * 100)
-    Popen(blast_cmd, stdout=PIPE, shell=True, universal_newlines=True).communicate()
+    blast_cmd = [blastn, '-db', refDb, '-query', qry,
+                 '-word_size', '11', '-out', outfile,
+                 '-perc_identity', str(min_id * 100),
+                 '-outfmt', '6 qseqid sseqid pident length mismatch gapopen '
+                            'qstart qend sstart send evalue score qlen slen qseq sseq',
+                 '-qcov_hsp_perc', str(min_ratio * 100),
+                 '-num_alignments', '1000', '-task', 'blastn', '-evalue', '1e-2',
+                 '-dbsize', '5000000', '-reward', '2', '-penalty', '-3',
+                 '-gapopen', '6', '-gapextend', '2']
+    Popen(blast_cmd, stdout=PIPE, stderr=PIPE).communicate()
     if os.path.getsize(outfile) > 0:
         blastab = parseBlast(outfile, min_id, min_cov, min_ratio)
         os.unlink(outfile)
@@ -439,7 +446,7 @@ class RunBlast(object):
             self.pool = useProcess
 
         blastab = []
-        with tempfile.TemporaryDirectory(prefix='NS_', dir='.') as dirPath :
+        with tempfile.TemporaryDirectory(prefix='NS_') as dirPath :
             self.dirPath = dirPath
             for method in sorted(methods):
                 if method.lower() in tools:
@@ -589,9 +596,8 @@ class RunBlast(object):
         with open(refNA, 'w') as fout:
             for n, s in self.refSeq.items():
                 fout.write('>{0}\n{1}\n'.format(n, s))
-        Popen('{makeblastdb} -dbtype nucl -in {refNA} -out {refDb}'.format(makeblastdb=makeblastdb, refNA=refNA,
-                                                                           refDb=refDb).split(), stderr=PIPE,
-              stdout=PIPE, universal_newlines=True).communicate()
+        Popen([makeblastdb, '-dbtype', 'nucl', '-in', refNA, '-out', refDb],
+              stderr=PIPE, stdout=PIPE).communicate()
         qrySeq = sorted(list(self.qrySeq.items()), key=lambda s: -len(s[1]))
         qrys = [os.path.join(self.dirPath, 'qryNA.{0}'.format(id)) for id in range(min(len(qrySeq), self.n_thread))]
         for id, q in enumerate(qrys):
@@ -629,9 +635,8 @@ class RunBlast(object):
             for n, ss in sorted(qryAASeq.items()):
                 fout.write('>{0}:1\n{1}\n'.format(n, ss))
 
-        diamond_fmt = '{diamond} makedb --db {qryAA} --in {qryAA}'.format(
-            diamond=diamond, qryAA=qryAA)
-        p = Popen(diamond_fmt.split(), stderr=PIPE, stdout=PIPE, universal_newlines=True).communicate()
+        Popen([diamond, 'makedb', '--db', qryAA, '--in', qryAA],
+              stderr=PIPE, stdout=PIPE).communicate()
 
         refAASeq = transeq(self.refSeq, frames, transl_table=self.table_id)
         toWrite = []
@@ -648,10 +653,17 @@ class RunBlast(object):
             with open('{0}.{1}'.format(refAA, id), 'w') as fout:
                 for line in toWrite[id::5]:
                     fout.write(line)
-            diamond_cmd = '{diamond} blastp --gapopen 9 --no-self-hits --threads {n_thread} --db {refAA} --query {qryAA} --out {aaMatch} --id {min_id} --query-cover {min_ratio} --evalue 1 -k {nhits} --max-hsps {nhits} --dbsize 5000000 --outfmt 101'.format(
-                diamond=diamond, refAA='{0}.{1}'.format(refAA, id), qryAA=qryAA, aaMatch='{0}.{1}'.format(aaMatch, id),
-                n_thread=self.n_thread, min_id=self.min_id * 100., nhits=nhits, min_ratio=self.min_ratio * 100.)
-            Popen(diamond_cmd.split(), stdout=PIPE, stderr=PIPE, universal_newlines=True).communicate()
+            diamond_cmd = [diamond, 'blastp', '--gapopen', '9', '--no-self-hits',
+                           '--threads', str(self.n_thread),
+                           '--db', '{0}.{1}'.format(refAA, id),
+                           '--query', qryAA,
+                           '--out', '{0}.{1}'.format(aaMatch, id),
+                           '--id', str(self.min_id * 100.),
+                           '--query-cover', str(self.min_ratio * 100.),
+                           '--evalue', '1', '-k', str(nhits),
+                           '--max-hsps', str(nhits), '--dbsize', '5000000',
+                           '--outfmt', '101']
+            Popen(diamond_cmd, stdout=PIPE, stderr=PIPE).communicate()
         blastab = []
         for r in self.pool.imap_unordered(parseDiamond, [
             ['{0}.{1}'.format(aaMatch, id), self.refSeq, self.qrySeq, self.min_id, self.min_cov, self.min_ratio] for id
@@ -678,9 +690,8 @@ class RunBlast(object):
                 _, id, s = min([(-len(s.replace('X', '')), id, s) for id, s in enumerate(ss[:3])])
                 fout.write('>{0}:{1}\n{2}\n'.format(n, id + 1, s))
 
-        diamond_fmt = '{diamond} makedb --db {qryAA} --in {qryAA}'.format(
-            diamond=diamond, qryAA=qryAA)
-        p = Popen(diamond_fmt.split(), stderr=PIPE, stdout=PIPE, universal_newlines=True).communicate()
+        Popen([diamond, 'makedb', '--db', qryAA, '--in', qryAA],
+              stderr=PIPE, stdout=PIPE).communicate()
 
         refAASeq = transeq(self.refSeq, frames, transl_table=self.table_id)
         toWrite = []
@@ -697,10 +708,17 @@ class RunBlast(object):
             with open('{0}.{1}'.format(refAA, id), 'w') as fout:
                 for line in toWrite[id::5]:
                     fout.write(line)
-            diamond_cmd = '{diamond} blastp --gapopen 9 --sensitive --no-self-hits --threads {n_thread} --db {refAA} --query {qryAA} --out {aaMatch} --id {min_id} --query-cover {min_ratio} --evalue 1000 -k {nhits} --max-hsps {nhits} --dbsize 5000000 --outfmt 101'.format(
-                diamond=diamond, refAA='{0}.{1}'.format(refAA, id), qryAA=qryAA, aaMatch='{0}.{1}'.format(aaMatch, id),
-                n_thread=self.n_thread, min_id=self.min_id * 100., nhits=nhits, min_ratio=self.min_ratio * 100.)
-            Popen(diamond_cmd.split(), stdout=PIPE, stderr=PIPE, universal_newlines=True).communicate()
+            diamond_cmd = [diamond, 'blastp', '--gapopen', '9', '--sensitive', '--no-self-hits',
+                           '--threads', str(self.n_thread),
+                           '--db', '{0}.{1}'.format(refAA, id),
+                           '--query', qryAA,
+                           '--out', '{0}.{1}'.format(aaMatch, id),
+                           '--id', str(self.min_id * 100.),
+                           '--query-cover', str(self.min_ratio * 100.),
+                           '--evalue', '1000', '-k', str(nhits),
+                           '--max-hsps', str(nhits), '--dbsize', '5000000',
+                           '--outfmt', '101']
+            Popen(diamond_cmd, stdout=PIPE, stderr=PIPE).communicate()
         blastab = []
         for r in self.pool.imap_unordered(parseDiamond, [
             ['{0}.{1}'.format(aaMatch, id), self.refSeq, self.qrySeq, self.min_id, self.min_cov, self.min_ratio] for id

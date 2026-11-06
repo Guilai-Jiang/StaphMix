@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "staphmix"
+dynamic = ["version"]
+description = "One-stop cgMLST, virulence, resistance and SCCmec typing for Staphylococcus aureus genomes"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "GPL-3.0-or-later" }
+authors = [{ name = "Guilai Jiang" }]
+keywords = ["bioinformatics", "staphylococcus aureus", "cgMLST", "SCCmec", "AMR", "VFDB"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Operating System :: POSIX :: Linux",
+]
+dependencies = [
+    "numpy",
+    "pandas",
+    "numba",
+    "biopython",
+    "click",
+]
+
+[project.urls]
+Homepage = "https://github.com/Guilai-Jiang/StaphMix"
+Source = "https://github.com/Guilai-Jiang/StaphMix"
+Issues = "https://github.com/Guilai-Jiang/StaphMix/issues"
+
+[project.scripts]
+staphmix = "staphmix.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "staphmix.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["staphmix*"]

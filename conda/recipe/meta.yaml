@@ -1,0 +1,62 @@
+{% set name = "staphmix" %}
+{% set version = "0.1.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+# Local build from a source checkout. For a release build, replace this block
+# with the tagged tarball (and its sha256):
+#
+# source:
+#   url: https://github.com/Guilai-Jiang/StaphMix/archive/refs/tags/v{{ version }}.tar.gz
+#   sha256: <sha256 of that tarball>
+source:
+  path: ../..
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
+  entry_points:
+    - staphmix = staphmix.cli:main
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+    - setuptools
+  run:
+    - python >=3.8
+    - numpy
+    - pandas
+    - numba
+    - biopython
+    - click
+    # External executables used by the pipeline
+    - blast >=2.14
+    - diamond >=2.2
+    - fastani >=1.33
+    - ncbi-amrfinderplus >=3.11
+
+test:
+  imports:
+    - staphmix
+  commands:
+    - staphmix --version
+    - staphmix --help
+
+about:
+  home: https://github.com/Guilai-Jiang/StaphMix
+  license: GPL-3.0-or-later
+  license_file: COPYING
+  summary: One-stop cgMLST, virulence, resistance and SCCmec typing for Staphylococcus aureus
+  description: |
+    StaphMix profiles Staphylococcus aureus genomes: ANI-based confirmation,
+    cgMLST allele calling and HierCC assignment, SCCmec typing, VFDB virulence
+    genes and AMRFinderPlus resistance genes, summarized in one table.
+  dev_url: https://github.com/Guilai-Jiang/StaphMix
+
+extra:
+  recipe-maintainers:
+    - Guilai-Jiang

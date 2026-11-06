@@ -1,0 +1,15 @@
+name: staphmix
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python >=3.8
+  - numpy
+  - pandas
+  - numba
+  - biopython
+  - click
+  - blast >=2.14
+  - diamond >=2.2
+  - fastani >=1.33
+  - ncbi-amrfinderplus >=3.11

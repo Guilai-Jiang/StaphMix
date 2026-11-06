@@ -1,15 +1,38 @@
+import os
 import subprocess
 
+from .configure import exe
 
+
+def ensure_blast_db(db):
+    """Build BLAST indices next to the FASTA if they are not there yet."""
+    if os.path.exists(db + '.nin'):
+        return
+    proc = subprocess.run([exe['makeblastdb'], '-dbtype', 'nucl', '-in', db, '-out', db],
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if proc.returncode != 0:
+        raise RuntimeError(
+            'Could not build BLAST database for {0} (is the directory writable?):\n{1}'
+            .format(db, proc.stderr.strip()))
 
 
 def run_scc_blastn(query,db,cpus,n_hits=3000,topOnly=True,ident=90, cov=60,sum_cov=60):
-    blastn_cmd = f'blastn -num_threads {cpus} -task blastn -query {query} -db {db} -max_target_seqs {n_hits} -outfmt "6 qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue score qlen slen"'
+    ensure_blast_db(db)
+    cmd = [exe['blastn'],
+           '-num_threads', str(cpus),
+           '-task', 'blastn',
+           '-query', query,
+           '-db', db,
+           '-max_target_seqs', str(n_hits),
+           '-outfmt', '6 qaccver saccver pident length mismatch gapopen '
+                      'qstart qend sstart send evalue score qlen slen']
     bsn = []
-    p = subprocess.Popen(blastn_cmd, shell=True,stdout=subprocess.PIPE, universal_newlines=True)
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
     for line in p.stdout :
         part = line.strip().split('\t')
-        part[2:] = [float(p) for p in part[2:]]
+        if len(part) < 14 :
+            continue
+        part[2:] = [float(v) for v in part[2:]]
         if part[2] < ident :
             continue
         part[5] = '+'
@@ -38,7 +61,7 @@ def run_scc_blastn(query,db,cpus,n_hits=3000,topOnly=True,ident=90, cov=60,sum_c
                 if o >= 0.4*(b1[7]-b1[6]+1) or o > 0.4*(b2[7]-b2[6]+1) :
                     if b1[2] >= b2[2]+1 and b1[11] >= b2[11] :
                         b2[0] = ''
-                    elif b1[2] >= b1[2]+1 and b2[11] >= b1[11] :
+                    elif b2[2] >= b1[2]+1 and b2[11] >= b1[11] :
                         b1[0] = ''
         bsn = sorted([b for  b in bsn if b[0] != ''], key=lambda x:(x[1], x[8], x[9]))
         
@@ -99,4 +122,3 @@ def run_scc_blastn(query,db,cpus,n_hits=3000,topOnly=True,ident=90, cov=60,sum_c
         scc_type_print = ','.join(predict_scc_type)
         return scc_type_print,outputs
 
-#run_scc_blastn('/home/guilai/software/tmpn27nk8rx.fasta','/home/guilai/software/StaphMix/db/whole_cassette_SCCmec_database_EXTENDED_20171117.fasta')

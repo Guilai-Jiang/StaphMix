@@ -6,15 +6,16 @@ def write_cgMLST(outdir_abpath,prefix,alleles) :
     outfile = os.path.join(outdir_abpath,output_name)
     with open(outfile, 'wt') as outfile :
         outfile.write('#Query\t{0}\n'.format('\t'.join([g for g in sorted(alleles.keys())])))
-        outfile.write('{0}\t{1}\n'.format(outdir_abpath, '\t'.join([allele.get('value_md5', '-') for g, allele in sorted(alleles.items())])))
+        outfile.write('{0}\t{1}\n'.format(prefix, '\t'.join([allele.get('value_md5', '-') for g, allele in sorted(alleles.items())])))
 
 
 def write_scc(outdir_abpath,prefix,scc_out):
     output_name = prefix + '.sccmec.txt'
     header = [
-    "Query contig", "Match ID", "Identity (%)", "Alignment Length", "Gap", 
-    "Strand", "Start Position (query)", "End Position (query)", "E-value", 
-    "Score", "Start Position (subject)", "End Position (subject)", "Bit Score"]
+    "Query contig", "Match ID", "Identity (%)", "Alignment Length", "Mismatch",
+    "Strand", "Start Position (query)", "End Position (query)",
+    "Start Position (subject)", "End Position (subject)", "E-value",
+    "Bit Score", "Query Length", "Subject Length"]
     outfile = os.path.join(outdir_abpath,output_name)
     with open(outfile, 'wt') as outfile :
         outfile.write('\t'.join(header)+'\n')
@@ -45,7 +46,7 @@ def write_amr(outdir_abpath,prefix,amr_out):
 
 def write_summary(outdir_abpath,prefix,summary_list):
     output_name = prefix + '.summary.txt'
-    header = ['Query genome','HC6','HC650','SCCmec tpye', 'Enterotoxin score',
+    header = ['Query genome','HC6','HC650','SCCmec type', 'Enterotoxin score',
               'Blood infection score','MRSA/MSSA','Antibiotic resistance core','Antibiotic resistance gene_class','Antibiotic resistance gene num','Special antibiotic resistance']
     outfile = os.path.join(outdir_abpath,output_name)
     with open(outfile, 'wt') as outfile :
