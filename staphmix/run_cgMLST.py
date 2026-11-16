@@ -61,7 +61,18 @@ def run_cgmlst(query, n_thread) :
     min_dist = int(profile.size-relshare[max_idx]+0.5)
     min_dist = max(0, min(profile.size, min_dist))
     ref_repr = repr_profile.index[max_idx][:13]
-    hc = repr_hcc.loc[ref_repr].values.astype(str).tolist()
+    # A 13-char accession may match several assembly versions in the HierCC
+    # table, so .loc can return a DataFrame instead of a Series. Missing
+    # references and short rows must not crash the run either.
+    try:
+        hrow = repr_hcc.loc[ref_repr]
+        if isinstance(hrow, pd.DataFrame):
+            hrow = hrow.iloc[0]
+        hc = hrow.values.astype(str).tolist()
+    except KeyError:
+        hc = []
+    if len(hc) < 651:
+        hc = hc + ['ND'] * (651 - len(hc))
     hc[:min_dist] = ['ND'] * min_dist
     hiercc = {'Reference_genome':ref_repr, 'Allelic_distance':min_dist}
     hiercc['Hierarchical_cluster_level - HC650'] = hc[650]
